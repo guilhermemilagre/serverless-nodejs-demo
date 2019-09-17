@@ -1,0 +1,37 @@
+service: person-stream-notification
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+  memorySize: 256
+  environment:
+    QUEUE_URL_EMAIL_NOTIFICATION: https://sqs.us-east-1.amazonaws.com/709790676899/email_notification
+    QUEUE_EMAIL_NOTIFICATION: email_notification
+    DYNAMODB_TABLE: person-service-dev
+    DYNAMODB_STREAM: arn:aws:dynamodb:us-east-1:709790676899:table/person-service-dev/stream/2019-08-28T03:54:31.568
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:GetRecords
+        - dynamodb:GetShardIterator
+        - dynamodb:DescribeStream
+        - dynamodb:ListStream
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"  
+    - Effect: "Allow"
+      Action:
+        - "sqs:SendMessage"
+        - "sqs:GetQueueUrl"
+      Resource: "arn:aws:sqs:${self:provider.region}:709790676899:${self:provider.environment.QUEUE_EMAIL_NOTIFICATION}"  
+
+functions:
+  record:
+    handler: handler.record
+    events:
+      - stream: "${self:provider.environment.DYNAMODB_STREAM}"
+
+resources:
+  Resources:
+    QueueEmailNotification:
+      Type: "AWS::SQS::Queue"
+      Properties:
+        QueueName: "${self:provider.environment.QUEUE_EMAIL_NOTIFICATION}"      

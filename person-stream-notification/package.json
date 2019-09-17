@@ -1,0 +1,10 @@
+{
+  "name": "person-service",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "uuid": "^2.0.3"
+  }
+}

@@ -1,0 +1,80 @@
+service: person-service
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+  memorySize: 256
+  environment:
+    DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"  
+
+functions:
+  create:
+    handler: person/create.create
+    events:
+      - http:
+          path: person
+          method: post
+          cors: true
+
+  list:
+    handler: person/list.list
+    events:
+      - http:
+          path: person
+          method: get
+          cors: true
+
+  get:
+    handler: person/get.get
+    events:
+      - http:
+          path: person/{id}
+          method: get
+          cors: true
+
+  update:
+    handler: person/update.update
+    events:
+      - http:
+          path: person/{id}
+          method: put
+          cors: true
+
+  delete:
+    handler: person/delete.delete
+    events:
+      - http:
+          path: person/{id}
+          method: delete
+          cors: true
+
+resources:
+  Resources:
+    TodosDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: id
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES  
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}          
