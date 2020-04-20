@@ -18,7 +18,7 @@ Este projeto está estruturado em 3 fluxos:
 
 Os 3 Serviços estão organizados em "Aplicativos" person-queue-consumer-notification, person-stream-notification, person-service.
 
-**Forma utilizados os seguintes serviços:**
+**Formam utilizados os seguintes serviços:**
 - API Gateway
 - CloudFront
 - AWS Lambda
